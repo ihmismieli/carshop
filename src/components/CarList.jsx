@@ -3,6 +3,9 @@ import { AgGridReact } from 'ag-grid-react';
 import Button from '@mui/material/Button'
 import Snackbar from '@mui/material/Snackbar';
 
+import AddCar from './AddCar';
+import EditCar from './EditCar';
+
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-material.css";
 
@@ -19,6 +22,9 @@ function CarList() {
         { field: "fuel", filter: true, width: 120 },
         { headerName: "Year", field: "modelYear", filter: true, width: 150 },
         { field: "price", filter: true, width: 120 },
+        { 
+            cellRenderer: row => <EditCar updateCar={updateCar} car={row.data}/>
+        },
         {
             cellRenderer: params => <Button size='small' color='error' onClick={() => handleDelete(params.data)}>Delete</Button>
         },
@@ -62,9 +68,34 @@ function CarList() {
         setOpen(false);
     }
 
+    const saveCar = (car) => {
+        fetch("https://car-rest-service-carshop.2.rahtiapp.fi/cars", {
+            method: 'POST',
+            headers: {
+                'Content-Type' : 'application/json'
+            },
+            body: JSON.stringify(car)
+        })
+        .then(response => handleFetch())
+        .catch(err => console.error(err))
+    }
+
+    const updateCar = (car, link) => {
+        fetch(link, {
+            method: 'PUT',
+            headers: {
+                'Content-Type' : 'application/json'
+            },
+            body: JSON.stringify(car)
+        })
+        .then(response => handleFetch())
+        .catch(err => console.error(err))
+    }
+
     return (
         <>
             <div className='ag-theme-material' style={{ height: 500 }}>
+            <AddCar saveCar={saveCar}/>
                 <AgGridReact
                     rowData={cars}
                     columnDefs={colDefs}
